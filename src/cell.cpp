@@ -2,8 +2,15 @@
 
 cCell::cCell()
 {
-	//TODO
-	//initialize with default
+	Capacity = 800*3600;
+	InitialVoltage = 12;
+	SeriesResistance = 20;
+	Shift1 = 10;
+	Shift2 = 90;
+	Drop1 = 5;
+	Drop2 = 25;
+	AttachedTo = NULL;
+	Locked = false;
 }
 
 bool cCell::setInitialVoltage(double initv)
@@ -110,6 +117,9 @@ void cCell::initialse(void)
 	m2 = (InitialVoltage * (Drop2 - Drop1)) / (Capacity * (Shift2 - Shift1));
 	m2 = (InitialVoltage * (100 - Drop2)) / (Capacity * (100 - Shift2));
 	
+	CurrentVoltage = InitialVoltage;
+	DischargedCapacity = 0;
+	RemainigCapacity = 100;
 	Gradient = m1;
 	ConstantK = 0;
 	return;
@@ -135,4 +145,19 @@ bool cCell::update(double outVolt, double milisec)
 	}
 	return true;
 }
+
+bool cCell::loadDefaults(cBattery* owner)
+{
+	if(owner != AttachedTo)
+		return false;
+	CurrentVoltage = InitialVoltage;
+	RemainigCapacity = 100;
+	DischargedCapacity = 0;
+	Gradient = m1;
+	ConstantK = 0;
+	return true;
+}
+	
+	
+	
 	

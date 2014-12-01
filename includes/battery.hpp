@@ -15,7 +15,7 @@
 #ifndef  BATTERY_CLASS
 #define  BATTERY_CLASS
 
-#include "cell.cpp"
+#include "cell.hpp"
 
 
 /**
@@ -45,6 +45,7 @@ class cBattery
 		double CutOffVoltage;	///<Battery will be disconnected when Output voltage drops below this. expressed in Volts.
 		std::thread* Runner;
 		void runBattery(double,double,double);
+		int count;
 };
 
 #endif //BATTERY_CLASS

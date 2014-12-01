@@ -60,6 +60,7 @@ class cCell
 		double SourceCurrent;		///<Current sourced by the cell in Ampere.
 		double CurrentVoltage;		///<Current voltage of the cell in Volts.
 		void initialse(void);
+		bool loadDefaults(cBattery*);
 };
 
 #endif //CELL_CLASS

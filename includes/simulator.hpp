@@ -8,19 +8,17 @@ class cBatSim
 	public:
 		cBatSim(void);
 		cBatSim(int,double);
-		~cBatSim(void);
 		bool start(void);
 		bool stop(void);
 		bool pause(void);
 		bool resume(void);
-		bool setLoad(double);
 		bool setSpeed(int);
 		bool setResolution(double);
-		bool connect(cBattery&);
+		bool connect(cBattery*);
 		bool connect(double);
 	private:
 		double Load;
-		cBattery &BatPack;
+		cBattery *BatPack;
 		double Speed;
 		double Resolution;
 };
