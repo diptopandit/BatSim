@@ -38,6 +38,7 @@ class cCell
 		double getSourceCurrent(void);
 		double getCurrentVoltage(void);
 		double getCapacity(void);
+		double getRemainingCapacityPercentage(void);
 		bool lock(cBattery*);
 		bool unlock(cBattery*);
 		bool update(double, double);
