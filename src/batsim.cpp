@@ -61,20 +61,19 @@ void showHelp(void)
 	return;
 }
 
-
 int main()
 {
 	cCell Cell[3];
 	cBattery BatPack;
 	cBatSim Simulator;
 
-	Cell[0].setInitialVoltage(11.5);
-	Cell[1].setInitialVoltage(11.9);
-	Cell[2].setInitialVoltage(12.2);
+	Cell[0].setInitialVoltage(12.2);
+	Cell[1].setInitialVoltage(10.9);
+	Cell[2].setInitialVoltage(11.8);
 
-	Cell[0].setSeriesResistance(20);
-	Cell[1].setSeriesResistance(30);
-	Cell[2].setSeriesResistance(15);
+	Cell[0].setSeriesResistance(30);
+	Cell[1].setSeriesResistance(10);
+	Cell[2].setSeriesResistance(20);
 
 	BatPack.addCell(&Cell[0]);
 	BatPack.addCell(&Cell[1]);
@@ -89,6 +88,7 @@ int main()
 	cParser Parser;
 	bool exit_loop = false;
 	int Function = 0;
+	int i;
 
 	while(!exit_loop)
 	{
@@ -97,25 +97,24 @@ int main()
 			if(Parser.parseInput(validCommands,validKeys))
 			{
 				Function = Parser.getFunctionNumber();
-				//std::cout<<"function: "<<Function<<std::endl;
 				switch(Function)
 				{
 					case GETCVOL:
-						if(Parser.getParamCount() < 1)
-						{
-							std::cout<<"Insufficient arguments. Specify cell number"<<std::endl;
-							break;
-						}
-						if(Parser.getParam(0) > 3 || Parser.getParam(0) < 1)
-						{
-							std::cout<<"Invalid cell number"<<std::endl;
-							break;
-						}
-						std::cout<<"Cell "<<Parser.getParam(0)<<" voltage: "<<Cell[(int)Parser.getParam(0)-1].getCurrentVoltage()<<" V"<<std::endl;
+						if(Parser.getParamCount() > 0)
+							std::cout<<"Extra parameters omitted."<<std::endl;
+						std::cout<<"Cell Voltage:\n";
+						for(i =0; i<3 ; i++)
+							std::cout<<"Cell "<<i<<": "<<std::fixed<<std::setprecision(3)<<Cell[i].getCurrentVoltage()<<" V.\n";
 					break;
 					case GETLOAD:
+						std::cout<<"Connected Load: "<<Simulator.getLoad()<<" V."<<std::endl;
 					break;
 					case GETSCUR:
+						if(Parser.getParamCount() > 0)
+							std::cout<<"Extra parameters omitted."<<std::endl;
+						std::cout<<"Source current:\n";
+						for(i =0; i<3 ; i++)
+							std::cout<<"Cell "<<i<<": "<<std::fixed<<std::setprecision(3)<<Cell[i].getSourceCurrent()*1000<<" mA.\n";
 					break;
 					case GETVOUT:
 						std::cout<<"Output Voltage: "<<std::setprecision(3)<<BatPack.getVout()<<" V."<<std::endl;
@@ -129,34 +128,75 @@ int main()
 						std::cout<<"Runtime: "<<BatPack.getElapsedTime()<<std::endl;
 					break;
 					case GETSWCH:
+						if(Parser.getParamCount() > 0)
+							std::cout<<"Extra parameters omitted."<<std::endl;
+						std::cout<<"Switch states:\n";
+						for(i =0; i<3 ; i++)
+						{
+							std::cout<<"Switch "<<i<<": ";
+							if(BatPack.getSwitchState(i))
+							std::cout<<"ON\n";
+						else
+							std::cout<<"OFF\n";
+						}
+					break;
+					case SETINTV:
 						if(Parser.getParamCount() < 1)
 						{
-							std::cout<<"Insufficient arguments. Specify cell number"<<std::endl;
+							std::cout<<"Insufficient arguments. Specify one or more cell's initial voltage."<<std::endl;
 							break;
 						}
-						if(Parser.getParam(0) > 3 || Parser.getParam(0) < 1)
+						std::cout<<"Setting...";
+						for( i=0;i<Parser.getParamCount() && i<3;i++)
 						{
-							std::cout<<"Invalid cell number"<<std::endl;
+							if(Cell[i].setInitialVoltage(Parser.getParam(i)))
+								std::cout<<i<<": Done."<<std::endl;
+						}
+						if(Parser.getParamCount() > 3)
+							std::cout<<"Extra parameters omitted."<<std::endl;
+					break;
+					case SETLOAD:
+						if(Parser.getParamCount() < 1)
+						{
+							std::cout<<"Insufficient arguments. Specify load resistance."<<std::endl;
 							break;
 						}
-						std::cout<<"Switch"<<Parser.getParam(0)<<": ";
-						if(BatPack.getSwitchState(Parser.getParam(0)-1))
-							std::cout<<"ON";
+						if(Simulator.connect(Parser.getParam(0)))
+							std::cout<<"Connected\n";
 						else
-							std::cout<<"OFF";
-						std::cout<<"."<<std::endl;
+							std::cout<<"Error\n";
+						if(Parser.getParamCount() > 1)
+							std::cout<<"Extra parameters omitted."<<std::endl;
+					break;
+					case SETSRES:
+					break;
+					case SETADVSH1:
+					break;
+					case SETADVSH2:
+					break;
+					case SETADVDP1:
+					break;
+					case SETADVDP2:
+					break;
+					case SETADVCUT:
+					break;
+					case SETADVCAP:
 					break;
 					case SIMSTART:
+						if(Parser.getParamCount() > 0)
+							std::cout<<"Extra parameters omitted."<<std::endl;
 						if(Simulator.start())
-							std::cout<<"Simulation started"<<std::endl;
+							std::cout<<"Simulation started."<<std::endl;
 						else
-							std::cout<<"Simulation already running"<<std::endl;
+							std::cout<<"Simulation already running."<<std::endl;
 					break;
 					case SIMSTOP:
+						if(Parser.getParamCount() > 0)
+							std::cout<<"Extra parameters omitted."<<std::endl;
 						if(Simulator.stop())
-							std::cout<<"Simulation stopped"<<std::endl;
+							std::cout<<"Simulation stopped."<<std::endl;
 						else
-							std::cout<<"Simulation is not running currently"<<std::endl;
+							std::cout<<"Simulation is not running currently."<<std::endl;
 					break;
 					case HELP:
 						showHelp();

@@ -4,11 +4,11 @@
 
 cBattery::cBattery()
 {
-	std::cout<<__func__<<std::endl;
 	count = 0;
 	Vout = 0;
 	Iout = 0;
 	ElapsedTime = 0;
+	CutOffVoltage = 7;
 	SimulatorState.unlock();
 	for(int i=0; i<3; i++)
 		Switch[i] = false;
@@ -36,13 +36,26 @@ bool cBattery::reset(void)
 {
 	bool status = false;
 	for(int i=0; i<3; i++)
-		status = Cell[i]->loadDefaults(this);
+	{
+		status = Cell[i]->lock(this);
+		if(status)
+		{
+			status = Cell[i]->loadDefaults(this);
+			Cell[i]->unlock(this);
+		}
+	}
 	return status;
 }
 
 bool cBattery::run(double load,double resolution,double speed)
 {
 	if(IsRunning())
+		return false;
+	bool status = false;
+	status = Cell[0]->lock(this);
+	if(status) status = Cell[1]->lock(this);
+	if(status) status = Cell[2]->lock(this);
+	if(!status)
 		return false;
 	SimulatorState.lock();
 	Runner = new std::thread(&cBattery::runBattery, this, load, resolution, speed);
@@ -51,23 +64,24 @@ bool cBattery::run(double load,double resolution,double speed)
 
 bool cBattery::stop(void)
 {
-	std::cout<<__func__<<std::endl;
 	if(IsRunning())
 	{
 		SimulatorState.unlock();
 		Runner->join();
-		return true;
+		bool status = false;
+		status = Cell[0]->unlock(this);
+		if(status) status = Cell[1]->unlock(this);
+		if(status) status = Cell[2]->unlock(this);
+		return status;
 	}
 	return false;
 }
 
 bool cBattery::addCell(cCell* AdCell)
 {
-	std::cout<<__func__<<std::endl;
 	if(count>=3)
 		return false;
 	Cell[count++] = AdCell;
-	AdCell->lock(this);
 	return true;
 }
 
@@ -147,7 +161,7 @@ void cBattery::runBattery(double load, double resolution, double speed)
 			OutVolt = OutVolt/divisor;
 			for(i=0;i<3;i++)
 			{
-				if(localSwitch[i] && (Cell[i]->getCurrentVoltage()<OutVolt))
+				if(localSwitch[i] && (Cell[i]->getCurrentVoltage() < OutVolt))
 				{
 					localSwitch[i] = false;
 					change = true;
@@ -163,9 +177,10 @@ void cBattery::runBattery(double load, double resolution, double speed)
 		if(OutVolt < CutOffVoltage)
 		{
 			for(i = 0; i<3; i++)
-				Switch[i] = false;
+				localSwitch[i] = false;
 			SimulatorState.unlock();
 			std::cout<<"\nBattery exhausted\nSimulation completed\n";
+			fprintf(logFile,"ALERT :: exhausted\n");
 			std::cout<<"BatSim >> ";
 		}
 

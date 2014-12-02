@@ -16,6 +16,7 @@ class cBatSim
 		bool setResolution(double);
 		bool connect(cBattery*);
 		bool connect(double);
+		double getLoad(void);
 	private:
 		double Load;
 		cBattery* BatPack;

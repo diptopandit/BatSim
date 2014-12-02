@@ -33,9 +33,14 @@ bool cBatSim::stop(void)
 {
 	if(!BatteryRunning)
 		return false;
+	std::cout<<"calling battery run"<<std::endl;
 	if(BatPack->stop())
+	{
+		std::cout<<"battery stopped"<<std::endl;
 		BatteryRunning = !BatPack->reset();
-	return !BatteryRunning;
+		return !BatteryRunning;
+	}
+	return false;
 }
 
 bool cBatSim::pause(void)
@@ -85,4 +90,9 @@ bool cBatSim::connect(double load)
 		return false;
 	Load = load;
 	return true;
+}
+
+double cBatSim::getLoad(void)
+{
+	return Load;
 }
