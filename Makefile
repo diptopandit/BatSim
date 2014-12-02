@@ -15,4 +15,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@ $(LINKFLAGS)
 
 clean:
-	rm -fr ./*/*.o batsim
+	rm -fr ./*/*.o $(EXECUTABLE)
