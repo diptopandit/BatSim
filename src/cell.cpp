@@ -9,7 +9,7 @@ cCell::cCell()
 	Shift2 = 90;
 	Drop1 = 5;
 	Drop2 = 25;
-	AttachedTo = NULL;
+	AttachedTo = (cBattery*)0;
 	Locked = false;
 }
 
@@ -58,6 +58,7 @@ bool cCell::setDropAmounts(double d1, double d2)
 		return false;
 	Drop1 = d1;
 	Drop2 = d2;
+	return true;
 }
 
 bool cCell::lock(cBattery* owner)
@@ -76,7 +77,7 @@ bool cCell::unlock(cBattery* owner)
 		return false;
 	if(AttachedTo != owner)
 		return false;
-	AttachedTo = NULL;
+	AttachedTo = (cBattery*)0;
 	Locked = false;
 	return true;
 }
@@ -111,12 +112,12 @@ double cCell::getRemainingCapacityPercentage(void)
 	return RemainigCapacity;
 }
 
-void cCell::initialse(void)
+void cCell::initialise(void)
 {
 	m1 = (InitialVoltage * Drop1) / (Capacity * Shift1);
 	m2 = (InitialVoltage * (Drop2 - Drop1)) / (Capacity * (Shift2 - Shift1));
 	m2 = (InitialVoltage * (100 - Drop2)) / (Capacity * (100 - Shift2));
-	
+
 	CurrentVoltage = InitialVoltage;
 	DischargedCapacity = 0;
 	RemainigCapacity = 100;
@@ -129,7 +130,7 @@ bool cCell::update(double outVolt, double milisec)
 {
 	if(0 == milisec)
 		return false;
-	SourceCurrent = (CurrentVoltage - outV) / SeriesResistance;
+	SourceCurrent = (CurrentVoltage - outVolt) / SeriesResistance;
 	DischargedCapacity += SourceCurrent * milisec;
 	RemainigCapacity = ((Capacity - DischargedCapacity) / Capacity) * 100;
 	CurrentVoltage = CurrentVoltage - Gradient*SourceCurrent*milisec + ConstantK;
@@ -157,7 +158,7 @@ bool cCell::loadDefaults(cBattery* owner)
 	ConstantK = 0;
 	return true;
 }
-	
-	
-	
-	
+
+
+
+

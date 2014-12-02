@@ -18,9 +18,10 @@ class cBatSim
 		bool connect(double);
 	private:
 		double Load;
-		cBattery *BatPack;
+		cBattery* BatPack;
 		double Speed;
 		double Resolution;
+		bool BatteryRunning;
 };
 
 #endif //SIMULATOR_CLASS

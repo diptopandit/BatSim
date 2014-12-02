@@ -1,9 +1,11 @@
 #include "../includes/simulator.hpp"
+#include <iostream>
 
 cBatSim::cBatSim(void)
 {
 	Resolution = 100;
 	Speed = 1;
+	BatteryRunning = false;
 }
 
 cBatSim::cBatSim(int multiplier, double res)
@@ -20,25 +22,28 @@ cBatSim::cBatSim(int multiplier, double res)
 
 bool cBatSim::start(void)
 {
-	//if(running)
-		//return false;
-	return BatPack->run(Load,Resolution,Speed);
+	if(BatteryRunning)
+		return false;
+	std::cout<<"calling battery run"<<std::endl;
+	BatteryRunning = BatPack->run(Load,Resolution,Speed);
+	return BatteryRunning;
 }
 
 bool cBatSim::stop(void)
 {
-	//if(!running)
-		//return false;
+	if(!BatteryRunning)
+		return false;
 	if(BatPack->stop())
-		return BatPack->reset();
-	return false;
+		BatteryRunning = !BatPack->reset();
+	return !BatteryRunning;
 }
 
 bool cBatSim::pause(void)
 {
-	//if(!running)
-		//return false;
-	return BatPack->stop();
+	if(!BatteryRunning)
+		return false;
+	BatteryRunning = BatPack->stop();
+	return BatteryRunning;
 }
 
 bool cBatSim::resume(void)
@@ -48,9 +53,9 @@ bool cBatSim::resume(void)
 
 bool cBatSim::setSpeed(int multiplier)
 {
-	//if(running)
-		//return false;
-	if(0 === multiplier)
+	if(BatteryRunning)
+		return false;
+	if(0 == multiplier)
 		return false;
 	Speed = multiplier;
 	return true;
@@ -58,8 +63,8 @@ bool cBatSim::setSpeed(int multiplier)
 
 bool cBatSim::setResolution(double milisec)
 {
-	//if(running)
-		//return false;
+	if(BatteryRunning)
+		return false;
 	if(0 == milisec)
 		return false;
 	Resolution = milisec;
@@ -68,16 +73,16 @@ bool cBatSim::setResolution(double milisec)
 
 bool cBatSim::connect(cBattery* battery)
 {
-	//if(running)
-		//return fasle;
+	if(BatteryRunning)
+		return false;
 	BatPack = battery;
 	return true;
 }
 
 bool cBatSim::connect(double load)
 {
-	//if(running)
-		//return false;
-	Load = laod;
+	if(BatteryRunning)
+		return false;
+	Load = load;
 	return true;
 }

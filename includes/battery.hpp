@@ -16,6 +16,8 @@
 #define  BATTERY_CLASS
 
 #include "cell.hpp"
+#include <thread>
+#include <mutex>
 
 
 /**
@@ -30,22 +32,30 @@
 class cBattery
 {
 	public:
-		cBattery(int);
+		cBattery();
 		bool reset(void);
 		bool run(double,double,double);
 		bool stop(void);
 		bool addCell(cCell*);
+		double getVout(void);
+		double getIout(void);
+		bool setCutOffVoltage(double);
+		double getElapsedTime(void);
+		bool getSwitchState(int);
+		bool IsRunning(void);
 	private:
-		int size;				///<Denotes number of cells added to the battery.
-		cCell *Cell[size];		///<Holds the cells that are added. @see addCell
-		bool Switch[size];		///<A switch for each cell
+		cCell *Cell[3];		///<Holds the cells that are added. @see addCell
+		bool Switch[3];		///<A switch for each cell
 		double Vout;			///<Output voltage of the battery in Volts.
 		double Iout;			///<Output current of the battery in Ampere.
 		double ElapsedTime;		///<Time for which the battery is running in mS.
 		double CutOffVoltage;	///<Battery will be disconnected when Output voltage drops below this. expressed in Volts.
 		std::thread* Runner;
+		std::mutex SimulatorState;
 		void runBattery(double,double,double);
+		bool ContinueRunning(void);
 		int count;
+		std::mutex AccessSynchroniser;
 };
 
 #endif //BATTERY_CLASS

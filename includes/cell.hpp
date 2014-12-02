@@ -42,6 +42,7 @@ class cCell
 		bool lock(cBattery*);
 		bool unlock(cBattery*);
 		bool update(double, double);
+		bool loadDefaults(cBattery*);
 	private:
 		bool Locked;				///<Denotes the cell is connected to a battery and the parameters are locked
 		cBattery* AttachedTo;		///<Denotes which battery it is connected to
@@ -59,8 +60,7 @@ class cCell
 		double RemainigCapacity;	///<Percentage of capacity remaining. (%)
 		double SourceCurrent;		///<Current sourced by the cell in Ampere.
 		double CurrentVoltage;		///<Current voltage of the cell in Volts.
-		void initialse(void);
-		bool loadDefaults(cBattery*);
+		void initialise(void);
 };
 
 #endif //CELL_CLASS
