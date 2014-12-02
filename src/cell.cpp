@@ -7,8 +7,8 @@ cCell::cCell()
 	SeriesResistance = 20;
 	Shift1 = 10;
 	Shift2 = 90;
-	Drop1 = 5;
-	Drop2 = 25;
+	Drop1 = 20;
+	Drop2 = 60;
 	AttachedTo = (cBattery*)0;
 	Locked = false;
 }
@@ -116,7 +116,7 @@ void cCell::initialise(void)
 {
 	m1 = (InitialVoltage * Drop1) / (Capacity * Shift1);
 	m2 = (InitialVoltage * (Drop2 - Drop1)) / (Capacity * (Shift2 - Shift1));
-	m2 = (InitialVoltage * (100 - Drop2)) / (Capacity * (100 - Shift2));
+	m3 = (InitialVoltage * (100 - Drop2)) / (Capacity * (100 - Shift2));
 
 	CurrentVoltage = InitialVoltage;
 	DischargedCapacity = 0;
@@ -131,18 +131,19 @@ bool cCell::update(double outVolt, double milisec)
 	if(0 == milisec)
 		return false;
 	SourceCurrent = (CurrentVoltage - outVolt) / SeriesResistance;
-	DischargedCapacity += SourceCurrent * milisec;
+	DischargedCapacity += (SourceCurrent * milisec);
 	RemainigCapacity = ((Capacity - DischargedCapacity) / Capacity) * 100;
 	CurrentVoltage = CurrentVoltage - Gradient*SourceCurrent*milisec + ConstantK;
+	
 	if((Gradient == m1) && (DischargedCapacity >= ((Shift1*Capacity)/100)))
 	{
 		Gradient = m2;
-		ConstantK = (m2 - m1)*DischargedCapacity;
+		ConstantK += (m2 - m1)*DischargedCapacity;
 	}
 	if((Gradient == m2) && (DischargedCapacity >= ((Shift2*Capacity)/100)))
 	{
 		Gradient = m3;
-		ConstantK = (m3 - m2)*DischargedCapacity;
+		ConstantK += (m3 - m2)*DischargedCapacity;
 	}
 	return true;
 }
