@@ -6,7 +6,7 @@
  * Implements the command line interface for the simulator.
  * @author Dipta Pandit
  * @date 30 Nov 2014
- * @see simulator.h
+ * @see batsim.hpp
 */
 
 #include "../includes/cell.hpp"
@@ -84,9 +84,11 @@ int main()
 	Simulator.setSpeed(1000);
 
 	const char* validCommands[] = {"get","set","setadv","sim","help","exit",(char*)0};
-	const char* validKeys[] = {"cvoltage","load","scurrent","vout","iout","status","runtime","sresistance","start","stop","shift1","shift2","drop1","drop2","cutoff","capacity","initv","sstate",(char*)0};
+	const char* validKeys[] = {"cvoltage","load","scurrent","vout","iout","status","runtime","sresistance","start","stop","shift","drop","cutoff","capacity","initv","sstate",(char*)0};
 	cParser Parser;
 	bool exit_loop = false;
+	double runtime;
+	int hh, mm, ss, uuu;
 	int Function = 0;
 	int i;
 
@@ -96,6 +98,15 @@ int main()
 		{
 			if(Parser.parseInput(validCommands,validKeys))
 			{
+				runtime = BatPack.getElapsedTime();
+				hh = (int)(runtime/(1000*3600));
+				runtime -= hh*3600*1000;
+				mm = (int)(runtime/(1000*60));
+				runtime -= mm*60*1000;
+				ss = (int)(runtime/1000);
+				runtime -= ss*1000;
+				uuu = (int)(runtime);
+				std::cout<<"["<<std::setw(2)<<std::setfill('0')<<hh<<":"<<mm<<":"<<ss<<":"<<std::setw(3)<<uuu<<"]\n";
 				Function = Parser.getFunctionNumber();
 				switch(Function)
 				{
@@ -146,11 +157,13 @@ int main()
 							std::cout<<"Insufficient arguments. Specify one or more cell's initial voltage."<<std::endl;
 							break;
 						}
-						std::cout<<"Setting...";
+						std::cout<<"Setting...\n";
 						for( i=0;i<Parser.getParamCount() && i<3;i++)
 						{
 							if(Cell[i].setInitialVoltage(Parser.getParam(i)))
-								std::cout<<i<<": Done."<<std::endl;
+								std::cout<<i+1<<": Done."<<std::endl;
+							else
+								std::cout<<i+1<<": Failed."<<std::endl;
 						}
 						if(Parser.getParamCount() > 3)
 							std::cout<<"Extra parameters omitted."<<std::endl;
@@ -169,18 +182,84 @@ int main()
 							std::cout<<"Extra parameters omitted."<<std::endl;
 					break;
 					case SETSRES:
+						if(Parser.getParamCount() < 1)
+						{
+							std::cout<<"Insufficient arguments. Specify one or more cell's series resistance."<<std::endl;
+							break;
+						}
+						std::cout<<"Setting...\n";
+						for( i=0;i<Parser.getParamCount() && i<3;i++)
+						{
+							if(Cell[i].setSeriesResistance(Parser.getParam(i)))
+								std::cout<<i+1<<": Done."<<std::endl;
+							else
+								std::cout<<i+1<<": Failed."<<std::endl;
+						}
+						if(Parser.getParamCount() > 3)
+							std::cout<<"Extra parameters omitted."<<std::endl;
 					break;
-					case SETADVSH1:
+					case SETADVSH:
+						if(Parser.getParamCount() < 3)
+						{
+							std::cout<<"Insufficient arguments. Specify cell number and 2 shift points."<<std::endl;
+							break;
+						}
+						if(Parser.getParam(0)<1 || Parser.getParam(0)>3)
+						{
+							std::cout<<"Invalid cell number."<<std::endl;
+							break;
+						}
+						std::cout<<"Setting...\n";
+						if(Cell[(int)(Parser.getParam(0)-1)].setShiftingPoints(Parser.getParam(1),Parser.getParam(2)))
+							std::cout<<"Done\n";
+						else
+							std::cout<<"Failed\n";
 					break;
-					case SETADVSH2:
-					break;
-					case SETADVDP1:
-					break;
-					case SETADVDP2:
+					case SETADVDP:
+						if(Parser.getParamCount() < 3)
+						{
+							std::cout<<"Insufficient arguments. Specify cell number and 2 drop amounts."<<std::endl;
+							break;
+						}
+						if(Parser.getParam(0)<1 || Parser.getParam(0)>3)
+						{
+							std::cout<<"Invalid cell number."<<std::endl;
+							break;
+						}
+						std::cout<<"Setting...\n";
+						if(Cell[(int)(Parser.getParam(0)-1)].setDropAmounts(Parser.getParam(1),Parser.getParam(2)))
+							std::cout<<"Done\n";
+						else
+							std::cout<<"Failed\n";
 					break;
 					case SETADVCUT:
+						if(Parser.getParamCount() < 1)
+						{
+							std::cout<<"Insufficient arguments. specify cutoff voltage for the battery."<<std::endl;
+							break;
+						}
+						std::cout<<"Setting...\n";
+						if(BatPack.setCutOffVoltage(Parser.getParam(0)))
+							std::cout<<"Done\n";
+						else
+							std::cout<<"Failed\n";
 					break;
 					case SETADVCAP:
+						if(Parser.getParamCount() < 1)
+						{
+							std::cout<<"Insufficient arguments. Specify one or more cell's capacity."<<std::endl;
+							break;
+						}
+						std::cout<<"Setting...\n";
+						for( i=0;i<Parser.getParamCount() && i<3;i++)
+						{
+							if(Cell[i].setCapacity(Parser.getParam(i)))
+								std::cout<<i+1<<": Done."<<std::endl;
+							else
+								std::cout<<i+1<<": Failed."<<std::endl;
+						}
+						if(Parser.getParamCount() > 3)
+							std::cout<<"Extra parameters omitted."<<std::endl;
 					break;
 					case SIMSTART:
 						if(Parser.getParamCount() > 0)
@@ -203,6 +282,7 @@ int main()
 					break;
 					case EXIT:
 						Simulator.stop();
+						std::cout<<"Exiting simulator now.\n";
 						exit_loop = true;
 					break;
 					default:

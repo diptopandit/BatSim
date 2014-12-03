@@ -16,6 +16,7 @@
 
 //forword declaration of Battery class
 class cBattery;
+#include <mutex>
 
 /**
  * @brief defines a cell
@@ -28,21 +29,21 @@ class cCell
 {
 	public:
 		cCell();
-		bool setInitialVoltage(double);
-		bool setSeriesResistance(double);
-		bool setCapacity(double);
-		bool setShiftingPoints(double, double);
-		bool setDropAmounts(double, double);
+		bool setInitialVoltage(double initv);
+		bool setSeriesResistance(double sres);
+		bool setCapacity(double cap);
+		bool setShiftingPoints(double d1, double d2);
+		bool setDropAmounts(double sh1, double sh2);
 		double getInitialVoltage(void);
 		double getSeriesResistance(void);
 		double getSourceCurrent(void);
 		double getCurrentVoltage(void);
 		double getCapacity(void);
 		double getRemainingCapacityPercentage(void);
-		bool lock(cBattery*);
-		bool unlock(cBattery*);
-		bool update(double, double);
-		bool loadDefaults(cBattery*);
+		bool lock(cBattery* owner);
+		bool unlock(cBattery* owner);
+		bool update(cBattery* owner,bool connected, double vout, double runtime);
+		bool loadDefaults(cBattery* owner);
 	private:
 		bool Locked;				///<Denotes the cell is connected to a battery and the parameters are locked
 		cBattery* AttachedTo;		///<Denotes which battery it is connected to
@@ -61,6 +62,7 @@ class cCell
 		double SourceCurrent;		///<Current sourced by the cell in Ampere.
 		double CurrentVoltage;		///<Current voltage of the cell in Volts.
 		void initialise(void);
+		std::mutex AccessSynchroniser;///<Lock to synchronize access to members from different thread
 };
 
 #endif //CELL_CLASS
