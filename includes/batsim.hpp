@@ -9,18 +9,16 @@
 #define GETIOUT		04
 #define GETSTAT		05
 #define GETRUNT		06
-#define GETSWCH		17
+#define GETSWCH		15
 
-#define SETINTV		116
+#define SETINTV		114
 #define SETLOAD		101
 #define SETSRES		107
 
-#define SETADVSH1	210
-#define SETADVSH2	211
-#define SETADVDP1	212
-#define SETADVDP2	213
-#define SETADVCUT	214
-#define SETADVCAP	215
+#define SETADVSH	210
+#define SETADVDP	211
+#define SETADVCUT	212
+#define SETADVCAP	213
 
 #define SIMSTART	308
 #define SIMSTOP		309

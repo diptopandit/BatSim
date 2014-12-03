@@ -34,14 +34,14 @@ class cBattery
 	public:
 		cBattery();
 		bool reset(void);
-		bool run(double,double,double);
+		bool run(double load,double resolution,double speed);
 		bool stop(void);
-		bool addCell(cCell*);
+		bool addCell(cCell* AdCell);
 		double getVout(void);
 		double getIout(void);
-		bool setCutOffVoltage(double);
+		bool setCutOffVoltage(double cutoff);
 		double getElapsedTime(void);
-		bool getSwitchState(int);
+		bool getSwitchState(int Cell);
 		bool IsRunning(void);
 	private:
 		cCell *Cell[3];		///<Holds the cells that are added. @see addCell
@@ -50,12 +50,12 @@ class cBattery
 		double Iout;			///<Output current of the battery in Ampere.
 		double ElapsedTime;		///<Time for which the battery is running in mS.
 		double CutOffVoltage;	///<Battery will be disconnected when Output voltage drops below this. expressed in Volts.
-		std::thread* Runner;
-		std::mutex SimulatorState;
-		void runBattery(double,double,double);
+		std::thread* Runner;	///<Pointer to the runner thread
+		std::mutex SimulatorState;	///<Used to signal thread terminaton event
+		void runBattery(double load,double resolution,double speed);
 		bool ContinueRunning(void);
-		int count;
-		std::mutex AccessSynchroniser;
+		int count;				///<number of cells added in the battery
+		std::mutex AccessSynchroniser; ///<Lock to synchronize access to members from different thread
 };
 
 #endif //BATTERY_CLASS
