@@ -6,7 +6,7 @@
  * Implements the command line interface for the simulator.
  * @author Dipta Pandit
  * @date 30 Nov 2014
- * @see simulator.h
+ * @see batsim.hpp
 */
 
 #include "../includes/cell.hpp"
