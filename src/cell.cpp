@@ -22,13 +22,13 @@
  */
 cCell::cCell()
 {
-	Capacity = 800*3600;
-	InitialVoltage = 12;
-	SeriesResistance = 20;
+	Capacity = 800*3600;		//800 mAH
+	InitialVoltage = 12;		//12 V
+	SeriesResistance = 0.001; 	//10 mOhm
 	Shift1 = 10;
-	Shift2 = 90;
-	Drop1 = 20;
-	Drop2 = 60;
+	Shift2 = 85;
+	Drop1 = 5;
+	Drop2 = 10;
 	AttachedTo = (cBattery*)0;
 	Locked = false;
 }
@@ -290,14 +290,14 @@ void cCell::initialise(void)
  * voltage for specific time. This actually implements the three
  * stage liniar approximation of the discharge curve of the cell
  *
- * @param cBattery* owner Owner of te cell
- * @param bool connected Weather or not the cell is connected
- * @param double vout 	 The output voltage it is connected to in Volt
- * @param double runtime For how long it was connected in milisec
- * @return bool true if Successfully update the cell.false if
+ * @param  owner Owner of te cell
+ * @param connected Weather or not the cell is connected
+ * @param vout 	 The output voltage it is connected to in Volt
+ * @param runtime For how long it was connected in milisec
+ * @return true if Successfully update the cell.false if
  * The cell is not owned by the battery or runtime is 0
  */
-bool cCell::update(cBattery* owner,bool connected, double vout, double runtime)
+bool cCell::update(cBattery* owner,bool connected, double scurrent, double runtime)
 {
 	if(AttachedTo != owner)
 		return false;
@@ -309,7 +309,7 @@ bool cCell::update(cBattery* owner,bool connected, double vout, double runtime)
 		return true;
 	}
 	AccessSynchroniser.lock();
-	SourceCurrent = (CurrentVoltage - vout) / SeriesResistance;
+	SourceCurrent = scurrent;
 	DischargedCapacity += (SourceCurrent * runtime);
 	RemainigCapacity = ((Capacity - DischargedCapacity) / Capacity) * 100;
 	CurrentVoltage = CurrentVoltage - Gradient*SourceCurrent*runtime + ConstantK;
@@ -334,7 +334,7 @@ bool cCell::update(cBattery* owner,bool connected, double vout, double runtime)
  * Resets the cell voltage to initial voltage
  * and, capacity to its full.
  *
- * @param cBattery* owner POinter to the Battery pack that the caell is attached to
+ * @param owner Pointer to the Battery pack that the caell is attached to
  * @return true if successfuly loaded the default values.false if The battrey does not own the cell.
  */
 bool cCell::loadDefaults(cBattery* owner)

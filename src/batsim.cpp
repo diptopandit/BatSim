@@ -48,16 +48,6 @@ void showHelp(void)
 			\n\t      \tSimulator log is generated ./batsim.log\
 			\n\thelp  \tPrints this help text.\
 			\n\texit  \tExits the simulator. If the simulator is still running, tries to stop it first.\n";
-	std::cout<<"\nDEFAULT VALUES\n\
-			\n\tInitial voltages  : 12.20 V, 10.90 V, 11.8 V\
-			\n\tSeries resistances: 30 Ohm,  10 Ohm,  20 Ohm\
-			\n\tLoad              : 160 Ohm\
-			\n\tCapacity          : 800 mAH\
-			\n\tshift1            : 10 %%\
-			\n\tshift2            : 90 %%\
-			\n\tdrop1             : 20 %%\
-			\n\tdrop2             : 60 %%\
-			\n\tCutoff voltage    : 07 V\n";
 	return;
 }
 
@@ -67,13 +57,13 @@ int main()
 	cBattery BatPack;
 	cBatSim Simulator;
 
-	Cell[0].setInitialVoltage(12.2);
-	Cell[1].setInitialVoltage(10.9);
-	Cell[2].setInitialVoltage(11.8);
+	Cell[0].setInitialVoltage(10.2);
+	Cell[1].setInitialVoltage(10.6);
+	Cell[2].setInitialVoltage(10.4);
 
-	Cell[0].setSeriesResistance(50);
-	Cell[1].setSeriesResistance(30);
-	Cell[2].setSeriesResistance(40);
+	//Cell[0].setSeriesResistance(50);
+	//Cell[1].setSeriesResistance(30);
+	//Cell[2].setSeriesResistance(40);
 
 	BatPack.addCell(&Cell[0]);
 	BatPack.addCell(&Cell[1]);
@@ -119,7 +109,7 @@ int main()
 							std::cout<<"Cell "<<i<<": "<<std::fixed<<std::setprecision(3)<<Cell[i].getCurrentVoltage()<<" V.\n";
 					break;
 					case GETLOAD:
-						std::cout<<"Connected Load: "<<Simulator.getLoad()<<" V."<<std::endl;
+						std::cout<<"Connected Load: "<<Simulator.getLoad()<<" Ohm."<<std::endl;
 					break;
 					case GETSCUR:
 						if(Parser.getParamCount() > 0)
@@ -135,9 +125,21 @@ int main()
 						std::cout<<"Output Current: "<<std::fixed<<std::setprecision(3)<<BatPack.getIout()<<" mA."<<std::endl;
 					break;
 					case GETSTAT:
+						std::cout<<"-----------------------------------------------------------------\n";
+						std::cout<<"Connected Load : "<<Simulator.getLoad()<<" Ohm."<<std::endl;
+						std::cout<<"-----------------------------------------------------------------\n";
+						std::cout<<"Parameter\t\tCell1\t\tCell2\t\tCell3\n";
+						std::cout<<"-----------------------------------------------------------------\n";
+						std::cout<<"Voltage\t\t\t"<<std::fixed<<std::setprecision(3)<<Cell[0].getCurrentVoltage()<<"\t\t"<<Cell[1].getCurrentVoltage()<<"\t\t"<<Cell[2].getCurrentVoltage()<<std::endl;
+						std::cout<<"SourceCurrent\t\t"<<std::fixed<<std::setprecision(3)<<Cell[0].getSourceCurrent()*1000<<"\t\t"<<Cell[1].getSourceCurrent()*1000<<"\t\t"<<Cell[2].getSourceCurrent()*1000<<std::endl;
+						std::cout<<"Switch state\t\t"<<BatPack.getSwitchState(0)<<"\t\t"<<BatPack.getSwitchState(1)<<"\t\t"<<BatPack.getSwitchState(2)<<std::endl;
+						std::cout<<"==================================================================\n";
+						std::cout<<"Output Voltage: "<<std::setprecision(3)<<BatPack.getVout()<<" V."<<std::endl;
+						std::cout<<"Output Current: "<<std::fixed<<std::setprecision(3)<<BatPack.getIout()<<" mA."<<std::endl;
+						std::cout<<"==================================================================\n\n\n";
 					break;
 					case GETRUNT:
-						std::cout<<"Runtime: "<<BatPack.getElapsedTime()<<std::endl;
+						std::cout<<"Runtime: "<<BatPack.getElapsedTime()<<" ms"<<std::endl;
 					break;
 					case GETSWCH:
 						if(Parser.getParamCount() > 0)

@@ -12,7 +12,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@ $(LINKFLAGS)
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -fr ./*/*.o batsim
+	rm -fr ./*/*.o $(EXECUTABLE)

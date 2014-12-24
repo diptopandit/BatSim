@@ -29,6 +29,7 @@ cBattery::cBattery()
 	Iout = 0;
 	ElapsedTime = 0;
 	CutOffVoltage = 7;
+	tollarance = 0.005; //50mV
 	SimulatorState.unlock();
 	for(int i=0; i<3; i++)
 		Switch[i] = false;
@@ -263,22 +264,27 @@ void cBattery::runBattery(double load, double resolution, double speed)
 		return;
 	bool status = false;
 	int i;
+	double seriesResistance[count];
 	for(i=0; i<count; i++)
 	{
 		status = Cell[i]->lock(this);
 		if(!status)
 			return;
+		seriesResistance[i] = Cell[i]->getSeriesResistance();
 	}
 
-	double OutVolt=0;
-	double divisor = 0;
-	bool change = false;
-	bool localSwitch[3] = {false,false,false};
-
+	int j, iTemp;
+	double dTemp;
+	double outVolt=0;
+	bool localSwitch[count];
+	int sortedCells[count];
+	double cellVoltages[count];
+	double tempVoltages[count];
+	double sourceCurrent[count];
+	double ratio;
+	
 	FILE* logFile;
-
 	logFile = fopen("./batsim.log","a");
-
 
 	fprintf(logFile,"***************************************************\n");
 	fprintf(logFile,"\t\t\tBattery Simulator\n");
@@ -288,35 +294,64 @@ void cBattery::runBattery(double load, double resolution, double speed)
 	while(ContinueRunning())
 	{
 
-		fprintf(logFile,"\n[%9.3f]\tOutVolt: %f\tIout: %f\n\tCell 1:: %d: %f V,\t%f mA\n\tCell 2:: %d: %f V,\t%f mA\n\tCell 3:: %d: %f V,\t%f mA\n",
+		fprintf(logFile,"\n[%9.3f]\toutVolt: %f\tIout: %f\n\tCell 1:: %d: %f V,\t%f mA\n\tCell 2:: %d: %f V,\t%f mA\n\tCell 3:: %d: %f V,\t%f mA\n",
 			ElapsedTime/1000,Vout,Iout*1000,Switch[0],Cell[0]->getCurrentVoltage(),Cell[0]->getSourceCurrent()*1000,Switch[1],Cell[1]->getCurrentVoltage(),Cell[1]->getSourceCurrent()*1000,Switch[2],Cell[2]->getCurrentVoltage(),Cell[2]->getSourceCurrent()*1000);
 
-		for(i=0;i<count;i++)
-			localSwitch[i] = true;
-		do
+	for(i=0;i<count;i++)
+	{
+		localSwitch[i] = false;
+		sortedCells[i] = i;
+		cellVoltages[i] = Cell[i]->getCurrentVoltage();
+		tempVoltages[i] = cellVoltages[i];
+	}
+		
+	for(i=0;i<count;i++)
+	{
+		for(j=i+1;j<count;j++)
 		{
-			change = false;
-			OutVolt = 0;
-			divisor =0;
-			for (i=0;i<count;i++)
+			if(tempVoltages[i]<tempVoltages[j])
 			{
-				if(localSwitch[i])
-				{
-					OutVolt += ((Cell[i]->getCurrentVoltage())/Cell[i]->getSeriesResistance());
-					divisor += (1/Cell[i]->getSeriesResistance());
-				}
+				iTemp=sortedCells[i];
+				dTemp=tempVoltages[i];
+				sortedCells[i]=sortedCells[j];
+				tempVoltages[i]=tempVoltages[j];
+				sortedCells[j]=iTemp;
+				tempVoltages[j]=dTemp;
 			}
-			divisor += (1/load);
-			OutVolt = OutVolt/divisor;
-			for(i=0;i<count;i++)
-			{
-				if(localSwitch[i] && (Cell[i]->getCurrentVoltage() < OutVolt))
-				{
-					localSwitch[i] = false;
-					change = true;
-				}
-			}
-		}while(change);
+		}
+	}
+	
+	localSwitch[sortedCells[0]] = true;
+	outVolt = cellVoltages[sortedCells[0]];
+	for(i=1;i<count;i++)
+	{
+		if((cellVoltages[sortedCells[0]] - cellVoltages[sortedCells[i]])<=tollarance)
+		{
+			localSwitch[sortedCells[i]] = true;
+			outVolt = cellVoltages[sortedCells[i]];
+		}
+	}
+	ratio = 0;
+	for(i=0;i<count;i++)
+	{
+		if(localSwitch[i])
+			ratio += cellVoltages[i]/seriesResistance[i];
+	}
+	
+	AccessSynchroniser.lock();
+	Vout = outVolt;
+	Iout = Vout / load;
+	
+	for(i=0;i<count;i++)
+	{
+		if(localSwitch[i])
+			sourceCurrent[i] = (Iout*cellVoltages[i])/(ratio * seriesResistance[i]);
+		else
+			sourceCurrent[i] = 0;
+		Switch[i] = localSwitch[i];
+		Cell[i]->update(this,localSwitch[i],sourceCurrent[i],resolution);
+	}
+	AccessSynchroniser.unlock();
 
 		//sleep for Inteval
 		usleep(resolution*1000/speed);
@@ -325,7 +360,7 @@ void cBattery::runBattery(double load, double resolution, double speed)
 		AccessSynchroniser.unlock();
 
 		//if total voltage < MIN, break;
-		if(OutVolt < CutOffVoltage)
+		if(outVolt < CutOffVoltage)
 		{
 			for(i = 0; i<count; i++)
 				localSwitch[i] = false;
@@ -334,21 +369,6 @@ void cBattery::runBattery(double load, double resolution, double speed)
 			fprintf(logFile,"ALERT :: exhausted\n");
 			std::cout<<"BatSim >> ";
 		}
-		AccessSynchroniser.lock();
-		//update out voltage
-		Vout = OutVolt;
-
-		//update the cells, switches and out current
-		Iout = 0;
-		for(i = 0; i<count; i++)
-		{
-			Cell[i]->update(this,localSwitch[i],Vout,resolution);
-			//update total current
-			Iout+= Cell[i]->getSourceCurrent();
-			//update the switch
-			Switch[i] = localSwitch[i];
-		}
-		AccessSynchroniser.unlock();
 	}
 	fprintf(logFile,"\n[%9.3f]\tSimulator Stopped\n",ElapsedTime/1000);
 	fcloseall();
