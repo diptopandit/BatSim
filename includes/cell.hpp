@@ -42,7 +42,11 @@ class cCell
 		double getRemainingCapacityPercentage(void);
 		bool lock(cBattery* owner);
 		bool unlock(cBattery* owner);
+<<<<<<< HEAD
 		bool update(cBattery* owner,bool connected, double scurrent, double runtime);
+=======
+		bool update(cBattery* owner,bool connected, double vout, double runtime);
+>>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 		bool loadDefaults(cBattery* owner);
 	private:
 		bool Locked;				///<Denotes the cell is connected to a battery and the parameters are locked

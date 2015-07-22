@@ -12,7 +12,11 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
+<<<<<<< HEAD
 	$(CC) $(CFLAGS) $< -o $@
+=======
+	$(CC) $(CFLAGS) $< -o $@ $(LINKFLAGS)
+>>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 
 clean:
 	rm -fr ./*/*.o $(EXECUTABLE)
