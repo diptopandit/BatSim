@@ -50,10 +50,7 @@ class cBattery
 		double Iout;			///<Output current of the battery in Ampere.
 		double ElapsedTime;		///<Time for which the battery is running in mS.
 		double CutOffVoltage;	///<Battery will be disconnected when Output voltage drops below this. expressed in Volts.
-<<<<<<< HEAD
 		double tollarance;
-=======
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 		std::thread* Runner;	///<Pointer to the runner thread
 		std::mutex SimulatorState;	///<Used to signal thread terminaton event
 		void runBattery(double load,double resolution,double speed);

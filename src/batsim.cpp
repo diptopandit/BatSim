@@ -48,8 +48,6 @@ void showHelp(void)
 			\n\t      \tSimulator log is generated ./batsim.log\
 			\n\thelp  \tPrints this help text.\
 			\n\texit  \tExits the simulator. If the simulator is still running, tries to stop it first.\n";
-<<<<<<< HEAD
-=======
 	std::cout<<"\nDEFAULT VALUES\n\
 			\n\tInitial voltages  : 12.20 V, 10.90 V, 11.8 V\
 			\n\tSeries resistances: 30 Ohm,  10 Ohm,  20 Ohm\
@@ -60,7 +58,6 @@ void showHelp(void)
 			\n\tdrop1             : 20 %%\
 			\n\tdrop2             : 60 %%\
 			\n\tCutoff voltage    : 07 V\n";
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 	return;
 }
 
@@ -70,15 +67,9 @@ int main()
 	cBattery BatPack;
 	cBatSim Simulator;
 
-<<<<<<< HEAD
-	Cell[0].setInitialVoltage(10.2);
-	Cell[1].setInitialVoltage(10.6);
-	Cell[2].setInitialVoltage(10.4);
-
 	//Cell[0].setSeriesResistance(50);
 	//Cell[1].setSeriesResistance(30);
 	//Cell[2].setSeriesResistance(40);
-=======
 	Cell[0].setInitialVoltage(12.2);
 	Cell[1].setInitialVoltage(10.9);
 	Cell[2].setInitialVoltage(11.8);
@@ -86,7 +77,6 @@ int main()
 	Cell[0].setSeriesResistance(30);
 	Cell[1].setSeriesResistance(10);
 	Cell[2].setSeriesResistance(20);
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 
 	BatPack.addCell(&Cell[0]);
 	BatPack.addCell(&Cell[1]);
@@ -95,10 +85,7 @@ int main()
 	Simulator.connect(&BatPack);
 	Simulator.connect(160);
 	Simulator.setSpeed(1000);
-<<<<<<< HEAD
 	Simulator.setResolution(10);
-=======
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 
 	const char* validCommands[] = {"get","set","setadv","sim","help","exit",(char*)0};
 	const char* validKeys[] = {"cvoltage","load","scurrent","vout","iout","status","runtime","sresistance","start","stop","shift","drop","cutoff","capacity","initv","sstate",(char*)0};
@@ -135,11 +122,7 @@ int main()
 							std::cout<<"Cell "<<i<<": "<<std::fixed<<std::setprecision(3)<<Cell[i].getCurrentVoltage()<<" V.\n";
 					break;
 					case GETLOAD:
-<<<<<<< HEAD
 						std::cout<<"Connected Load: "<<Simulator.getLoad()<<" Ohm."<<std::endl;
-=======
-						std::cout<<"Connected Load: "<<Simulator.getLoad()<<" V."<<std::endl;
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 					break;
 					case GETSCUR:
 						if(Parser.getParamCount() > 0)
@@ -155,7 +138,6 @@ int main()
 						std::cout<<"Output Current: "<<std::fixed<<std::setprecision(3)<<BatPack.getIout()<<" mA."<<std::endl;
 					break;
 					case GETSTAT:
-<<<<<<< HEAD
 						std::cout<<"-----------------------------------------------------------------\n";
 						std::cout<<"Connected Load : "<<Simulator.getLoad()<<" Ohm."<<std::endl;
 						std::cout<<"-----------------------------------------------------------------\n";
@@ -171,11 +153,6 @@ int main()
 					break;
 					case GETRUNT:
 						std::cout<<"Runtime: "<<BatPack.getElapsedTime()<<" ms"<<std::endl;
-=======
-					break;
-					case GETRUNT:
-						std::cout<<"Runtime: "<<BatPack.getElapsedTime()<<std::endl;
->>>>>>> 7ccaeb82ca3d8943f5564b6cec4bd43c611f7a69
 					break;
 					case GETSWCH:
 						if(Parser.getParamCount() > 0)
